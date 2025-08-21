@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>HLS Video Player</title>
+  <meta charset="utf-8" />
+  <title>HLS Player</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <style>
     body {
       margin: 0;
-      background: black;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background: #000;
     }
     video {
       width: 100%;
@@ -21,27 +21,28 @@
   </style>
 </head>
 <body>
-  <video id="video" controls autoplay></video>
+  <video id="video" controls></video>
 
   <script>
-    // Grab video src from ?src= in the URL
+    // Get ?src= param from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const videoSrc = urlParams.get('src');
-
-    const video = document.getElementById('video');
+    const videoSrc = urlParams.get("src");
 
     if (videoSrc) {
+      const video = document.getElementById("video");
+
       if (Hls.isSupported()) {
         const hls = new Hls();
         hls.loadSource(videoSrc);
         hls.attachMedia(video);
-      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // Safari fallback
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        // Safari native HLS
         video.src = videoSrc;
       }
     } else {
-      document.body.innerHTML = "<p style='color:white;'>No video source provided.</p>";
+      document.body.innerHTML = "<h2 style='color:white;'>No video source provided</h2>";
     }
   </script>
 </body>
 </html>
+
