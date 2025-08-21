@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>HLS Video Player</title>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    video {
+      width: 100%;
+      height: auto;
+      max-height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <video id="video" controls autoplay></video>
+
+  <script>
+    // Grab video src from ?src= in the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const videoSrc = urlParams.get('src');
+
+    const video = document.getElementById('video');
+
+    if (videoSrc) {
+      if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(videoSrc);
+        hls.attachMedia(video);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari fallback
+        video.src = videoSrc;
+      }
+    } else {
+      document.body.innerHTML = "<p style='color:white;'>No video source provided.</p>";
+    }
+  </script>
+</body>
+</html>
