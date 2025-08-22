@@ -1,48 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8">
   <title>HLS Player</title>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <style>
-    body {
-      margin: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: #000;
-    }
-    video {
-      width: 100%;
-      height: auto;
-      max-height: 100%;
-    }
-  </style>
 </head>
 <body>
-  <video id="video" controls></video>
+  <video id="video" controls autoplay style="width:100%; max-width:800px;"></video>
 
   <script>
-    // Get ?src= param from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const videoSrc = urlParams.get("src");
+    // Grab the ?src= parameter
+    const params = new URLSearchParams(window.location.search);
+    const rawSrc = params.get("src");
 
-    if (videoSrc) {
+    if (!rawSrc) {
+      document.body.insertAdjacentHTML("beforeend", "<p>No video source provided.</p>");
+    } else {
+      // Point through Cloudflare Worker proxy
+      const workerProxy = "https://hls-proxy.brett-66b.workers.dev/?url=";
+      const proxiedSrc = workerProxy + encodeURIComponent(rawSrc);
+
       const video = document.getElementById("video");
 
       if (Hls.isSupported()) {
         const hls = new Hls();
-        hls.loadSource(videoSrc);
+        hls.loadSource(proxiedSrc);
         hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          video.play();
+        });
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        // Safari native HLS
-        video.src = videoSrc;
+        video.src = proxiedSrc;
+        video.addEventListener("loadedmetadata", function () {
+          video.play();
+        });
       }
-    } else {
-      document.body.innerHTML = "<h2 style='color:white;'>No video source provided</h2>";
     }
   </script>
 </body>
 </html>
-
